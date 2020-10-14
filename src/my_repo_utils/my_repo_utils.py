@@ -29,12 +29,13 @@ def _query_github() -> Dict[Tuple[datetime.date, str], Row]:
     for repo in hub.get_user().get_repos():
         # if repo.name not in REPO_LIST:
         #     continue
-        print(repo.name)
+        print("Repo:", repo.name)
         clones_dat = repo.get_clones_traffic(per="day")
         clones = cast(List[Clones.Clones], clones_dat["clones"])
         for clone in clones:
             # print("clone", clone.uniques, clone.count, clone.timestamp)
-            dat.setdefault((clone.timestamp.date(), repo.name), Row()).clone = clone
+            clone_date = clone.timestamp.date()
+            dat.setdefault((clone_date, repo.name), Row()).clone = clone
 
         views_dat = repo.get_views_traffic(per="day")
         views = cast(List[View.View], views_dat["views"])
@@ -47,6 +48,9 @@ def _query_github() -> Dict[Tuple[datetime.date, str], Row]:
 
 
 def _write_csv(data) -> None:
+    now_date = datetime.datetime.now().date()
+    print('Now:', now_date)
+
     with Path(OUT_FILENAME).open("w", newline="") as out:
         csv_writer = csv.writer(out, dialect="excel")
 
@@ -58,6 +62,10 @@ def _write_csv(data) -> None:
         for key in items:
             day, repo_name = key
             row = data[key]
+            if day == now_date:
+                print("  skipping data that is timestamped today (as could be potentially incomplete)", key, row)
+                continue
+
             clone_count = 0 if row.clone is None else row.clone.count
             clone_uniques = 0 if row.clone is None else row.clone.uniques
             view_count = 0 if row.view is None else row.view.count
