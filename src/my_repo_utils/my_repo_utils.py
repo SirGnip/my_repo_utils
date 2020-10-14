@@ -11,7 +11,7 @@ from github import Github, Clones, View
 import click
 
 
-OUT_FILENAME = "repo_traffic.csv"
+OUT_FILENAME = "data/repo_traffic"
 
 REPO_LIST = ("arc_arena", "arcade_examples", "arcade_screensaver_framework")
 
@@ -48,10 +48,12 @@ def _query_github() -> Dict[Tuple[datetime.date, str], Row]:
 
 
 def _write_csv(data) -> None:
-    now_date = datetime.datetime.now().date()
-    print('Now:', now_date)
+    now = datetime.datetime.now().date()
+    print('Now:', now)
 
-    with Path(OUT_FILENAME).open("w", newline="") as out:
+    out_filename = f"{OUT_FILENAME}.{now.year:02}{now.month:02}{now.day:02}.csv"
+    print(f"Writing to {out_filename}")
+    with Path(out_filename).open("w", newline="") as out:
         csv_writer = csv.writer(out, dialect="excel")
 
         pprint.pprint(data)
@@ -62,7 +64,7 @@ def _write_csv(data) -> None:
         for key in items:
             day, repo_name = key
             row = data[key]
-            if day == now_date:
+            if day == now:
                 print("  skipping data that is timestamped today (as could be potentially incomplete)", key, row)
                 continue
 
