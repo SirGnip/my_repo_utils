@@ -11,7 +11,7 @@ from github import Github, Clones, View
 import click
 
 
-OUT_FILENAME = "data/repo_traffic"
+OUT_FILENAME = "data/repo_traffic.csv"
 
 REPO_LIST = ("arc_arena", "arcade_examples", "arcade_screensaver_framework")
 
@@ -51,9 +51,8 @@ def _write_csv(data) -> None:
     now = datetime.datetime.now().date()
     print('Now:', now)
 
-    out_filename = f"{OUT_FILENAME}.{now.year:02}{now.month:02}{now.day:02}.csv"
-    print(f"Writing to {out_filename}")
-    with Path(out_filename).open("w", newline="") as out:
+    print(f"Writing to {OUT_FILENAME}")
+    with Path(OUT_FILENAME).open("w", newline="") as out:
         csv_writer = csv.writer(out, dialect="excel")
 
         pprint.pprint(data)
